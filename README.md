@@ -16,4 +16,4 @@ HTML, CSS, JavaScript.
 ИСУ 470252
 
 Deploy
-Публикация на GitHub Pages.
+https://merksai.github.io/ToDo-list/
