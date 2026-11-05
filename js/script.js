@@ -45,7 +45,17 @@ addButton.type = "submit";
 addButton.className = "button";
 addButton.textContent = "Добавить";
 
-taskForm.append(taskLabel, taskDateLabel, addButton);
+const cancelButton = document.createElement("button");
+cancelButton.type = "button";
+cancelButton.className = "button button-secondary";
+cancelButton.textContent = "Отмена";
+cancelButton.hidden = true;
+
+const formActions = document.createElement("div");
+formActions.className = "form-actions";
+formActions.append(addButton, cancelButton);
+
+taskForm.append(taskLabel, taskDateLabel, formActions);
 taskSection.append(taskHeading, taskForm);
 
 const controlsSection = document.createElement("section");
@@ -139,3 +149,134 @@ taskList.className = "task-list";
 listSection.append(listHeading, emptyMessage, taskList);
 app.append(header, taskSection, controlsSection, listSection);
 document.body.append(app);
+
+let editingId = null;
+
+function resetForm() {
+    editingId = null;
+    taskForm.reset();
+    taskInput.setCustomValidity("");
+    taskHeading.textContent = "Новая задача";
+    addButton.textContent = "Добавить";
+    cancelButton.hidden = true;
+}
+
+function renderTasks() {
+    taskList.replaceChildren();
+    emptyMessage.hidden = tasks.length > 0;
+
+    tasks.forEach(function(task) {
+        const item = document.createElement("li");
+        item.className = "task-item";
+        item.classList.toggle("completed", task.completed);
+
+        const taskInfo = document.createElement("div");
+        taskInfo.className = "task-info";
+
+        const completionLabel = document.createElement("label");
+        completionLabel.className = "task-completion";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "task-checkbox";
+        checkbox.checked = task.completed;
+
+        const taskTitle = document.createElement("span");
+        taskTitle.className = "task-title";
+        taskTitle.textContent = task.title;
+        completionLabel.append(checkbox, taskTitle);
+
+        const taskDate = document.createElement("time");
+        taskDate.className = "task-date";
+        taskDate.dateTime = task.date;
+        taskDate.textContent = task.date.split("-").reverse().join(".");
+        taskInfo.append(completionLabel, taskDate);
+
+        const taskActions = document.createElement("div");
+        taskActions.className = "task-actions";
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "button button-secondary";
+        editButton.textContent = "Изменить";
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "button button-danger";
+        deleteButton.textContent = "Удалить";
+
+        checkbox.addEventListener("change", function() {
+            task.completed = checkbox.checked;
+            saveTasks();
+            renderTasks();
+        });
+
+        editButton.addEventListener("click", function() {
+            editingId = task.id;
+            taskInput.value = task.title;
+            taskDateInput.value = task.date;
+            taskInput.setCustomValidity("");
+            taskHeading.textContent = "Редактирование задачи";
+            addButton.textContent = "Сохранить";
+            cancelButton.hidden = false;
+            taskInput.focus();
+        });
+
+        deleteButton.addEventListener("click", function() {
+            tasks = tasks.filter(function(savedTask) {
+                return savedTask.id !== task.id;
+            });
+            if (editingId === task.id) {
+                resetForm();
+            }
+            saveTasks();
+            renderTasks();
+        });
+
+        taskActions.append(editButton, deleteButton);
+        item.append(taskInfo, taskActions);
+        taskList.append(item);
+    });
+}
+
+taskInput.addEventListener("input", function() {
+    taskInput.setCustomValidity("");
+});
+
+taskForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const taskTitle = taskInput.value.trim();
+    if (taskTitle === "") {
+        taskInput.setCustomValidity("Введите название задачи.");
+        taskInput.reportValidity();
+        return;
+    }
+
+    if (editingId === null) {
+        tasks.push({
+            id: Date.now(),
+            title: taskTitle,
+            date: taskDateInput.value,
+            completed: false
+        });
+    } else {
+        const task = tasks.find(function(savedTask) {
+            return savedTask.id === editingId;
+        });
+        task.title = taskTitle;
+        task.date = taskDateInput.value;
+    }
+
+    saveTasks();
+    resetForm();
+    renderTasks();
+    taskInput.focus();
+});
+
+cancelButton.addEventListener("click", function() {
+    resetForm();
+    taskInput.focus();
+});
+
+renderTasks();
