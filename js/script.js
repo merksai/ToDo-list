@@ -151,6 +151,7 @@ app.append(header, taskSection, controlsSection, listSection);
 document.body.append(app);
 
 let editingId = null;
+let draggedId = null;
 
 function resetForm() {
     editingId = null;
@@ -181,6 +182,16 @@ function renderTasks() {
         return true;
     });
 
+    if (sortSelect.value === "date-asc") {
+        filteredTasks.sort(function(firstTask, secondTask) {
+            return firstTask.date.localeCompare(secondTask.date);
+        });
+    } else if (sortSelect.value === "date-desc") {
+        filteredTasks.sort(function(firstTask, secondTask) {
+            return secondTask.date.localeCompare(firstTask.date);
+        });
+    }
+
     emptyMessage.hidden = filteredTasks.length > 0;
     if (tasks.length === 0) {
         emptyMessage.textContent = "Задач пока нет.";
@@ -192,6 +203,7 @@ function renderTasks() {
         const item = document.createElement("li");
         item.className = "task-item";
         item.classList.toggle("completed", task.completed);
+        item.draggable = sortSelect.value === "manual";
 
         const taskInfo = document.createElement("div");
         taskInfo.className = "task-info";
@@ -232,6 +244,64 @@ function renderTasks() {
             task.completed = checkbox.checked;
             saveTasks();
             renderTasks();
+        });
+
+        item.addEventListener("dragstart", function(event) {
+            if (!item.draggable) {
+                event.preventDefault();
+                return;
+            }
+            draggedId = task.id;
+            item.classList.add("dragging");
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", String(task.id));
+        });
+
+        item.addEventListener("dragover", function(event) {
+            if (sortSelect.value !== "manual" || draggedId === null || draggedId === task.id) {
+                return;
+            }
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+            item.classList.add("drag-over");
+        });
+
+        item.addEventListener("dragleave", function() {
+            item.classList.remove("drag-over");
+        });
+
+        item.addEventListener("drop", function(event) {
+            if (sortSelect.value !== "manual" || draggedId === null || draggedId === task.id) {
+                return;
+            }
+            event.preventDefault();
+
+            const sourceIndex = tasks.findIndex(function(savedTask) {
+                return savedTask.id === draggedId;
+            });
+            let targetIndex = tasks.indexOf(task);
+            if (sourceIndex === -1 || targetIndex === -1) {
+                return;
+            }
+
+            const movedTask = tasks.splice(sourceIndex, 1)[0];
+            targetIndex = tasks.indexOf(task);
+            const targetBounds = item.getBoundingClientRect();
+            if (event.clientY > targetBounds.top + targetBounds.height / 2) {
+                targetIndex++;
+            }
+            tasks.splice(targetIndex, 0, movedTask);
+            draggedId = null;
+            saveTasks();
+            renderTasks();
+        });
+
+        item.addEventListener("dragend", function() {
+            draggedId = null;
+            item.classList.remove("dragging");
+            document.querySelectorAll(".drag-over").forEach(function(target) {
+                target.classList.remove("drag-over");
+            });
         });
 
         editButton.addEventListener("click", function() {
@@ -305,5 +375,6 @@ cancelButton.addEventListener("click", function() {
 searchInput.addEventListener("input", renderTasks);
 filterDateInput.addEventListener("input", renderTasks);
 statusSelect.addEventListener("change", renderTasks);
+sortSelect.addEventListener("change", renderTasks);
 
 renderTasks();

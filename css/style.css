@@ -153,6 +153,20 @@ button:focus-visible {
     border-radius: 4px;
 }
 
+.task-item[draggable="true"] {
+    cursor: grab;
+}
+
+.task-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.task-item.drag-over {
+    outline: 2px solid #285c9e;
+    outline-offset: 2px;
+}
+
 .task-info {
     min-width: 0;
 }
