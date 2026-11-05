@@ -163,9 +163,32 @@ function resetForm() {
 
 function renderTasks() {
     taskList.replaceChildren();
-    emptyMessage.hidden = tasks.length > 0;
 
-    tasks.forEach(function(task) {
+    const searchText = searchInput.value.trim().toLowerCase();
+    const filteredTasks = tasks.filter(function(task) {
+        if (!task.title.toLowerCase().includes(searchText)) {
+            return false;
+        }
+        if (filterDateInput.value && task.date !== filterDateInput.value) {
+            return false;
+        }
+        if (statusSelect.value === "active" && task.completed) {
+            return false;
+        }
+        if (statusSelect.value === "completed" && !task.completed) {
+            return false;
+        }
+        return true;
+    });
+
+    emptyMessage.hidden = filteredTasks.length > 0;
+    if (tasks.length === 0) {
+        emptyMessage.textContent = "Задач пока нет.";
+    } else {
+        emptyMessage.textContent = "Задачи не найдены.";
+    }
+
+    filteredTasks.forEach(function(task) {
         const item = document.createElement("li");
         item.className = "task-item";
         item.classList.toggle("completed", task.completed);
@@ -278,5 +301,9 @@ cancelButton.addEventListener("click", function() {
     resetForm();
     taskInput.focus();
 });
+
+searchInput.addEventListener("input", renderTasks);
+filterDateInput.addEventListener("input", renderTasks);
+statusSelect.addEventListener("change", renderTasks);
 
 renderTasks();
