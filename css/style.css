@@ -1,0 +1,146 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 32px 16px;
+    background-color: #f3f4f6;
+    color: #222222;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+}
+
+.app {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 28px;
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    background-color: #ffffff;
+}
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+h2 {
+    margin: 0 0 16px;
+    font-size: 20px;
+}
+
+.task-section,
+.controls-section {
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #dddddd;
+}
+
+.task-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+}
+
+input,
+select,
+button {
+    min-width: 0;
+    min-height: 44px;
+    font: inherit;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #aaaaaa;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #222222;
+}
+
+.button {
+    padding: 10px 20px;
+    border: 1px solid #285c9e;
+    border-radius: 4px;
+    background-color: #285c9e;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #204b83;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+    outline: 2px solid #285c9e;
+    outline-offset: 3px;
+}
+
+.empty-message {
+    margin: 0;
+    padding: 24px 16px;
+    border: 1px dashed #bbbbbb;
+    border-radius: 4px;
+    color: #555555;
+    text-align: center;
+}
+
+.task-list {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (max-width: 900px) {
+    .filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .task-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 16px 12px;
+    }
+
+    .app {
+        padding: 20px 16px;
+    }
+
+    h1 {
+        font-size: 26px;
+    }
+
+    .filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
